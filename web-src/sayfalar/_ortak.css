@@ -1,0 +1,23 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #0d0b18; color: #ece8ff; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { padding: 14px 14px 120px; } /* sağ alttaki karakter dairesi içeriği örtmesin */
+h1 { font-size: 22px; margin: 2px 0 12px; display: flex; align-items: center; gap: 10px; }
+h1 small { font-size: 13px; color: #8f87b8; font-weight: 400; margin-left: auto; }
+h2 { font-size: 15px; color: #c9b8ff; margin: 18px 0 8px; }
+.kart { background: #16132a; border: 1px solid #2e2752; border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+input, select, textarea { width: 100%; background: #1e1a38; color: #ece8ff; border: 1px solid #2e2752; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+textarea { resize: vertical; min-height: 60px; }
+button { font: inherit; cursor: pointer; }
+.btn { background: #1e1a38; color: #e2d8ff; border: 1px solid #3a3266; border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+.btn.vurgu { border-color: #a77de8; color: #fff; background: #3a2a66; }
+.btn.kucuk { padding: 6px 10px; font-size: 13px; }
+.btn.tehlike { color: #ff9fb0; border-color: #6a2a3a; }
+.satir { display: flex; gap: 8px; align-items: center; }
+.satir > * { flex: 1; }
+.satir > .btn { flex: none; }
+.sekmeler { display: flex; gap: 6px; margin: 0 0 12px; overflow-x: auto; }
+.sekmeler button { flex: none; background: transparent; color: #a9a1d6; border: 1px solid #2e2752; border-radius: 20px; padding: 7px 12px; font-size: 13px; }
+.sekmeler button.aktif { background: #2b2350; color: #fff; border-color: #a77de8; }
+.bos { color: #6f6894; padding: 14px 4px; text-align: center; }
+.cip { display: inline-block; font-size: 12px; padding: 3px 9px; border-radius: 12px; border: 1px solid #3a3266; color: #cfc4ff; background: #1e1a38; }
+.gizli { display: none !important; }

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Lonca</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ÜST ŞERİT: saat · sohbet türü · sen yokken -->
+<header id="ust">
+  <button id="geriBtn" class="ikonBtn gizli" aria-label="Geri"></button>
+  <span id="saat"></span>
+  <button id="sohbetTur" aria-label="Sohbet türü"><i></i><span>Genel</span></button>
+  <span id="baslikYazi" class="gizli"></span>
+  <span class="bosluk"></span>
+  <button id="yokken" class="gizli" aria-label="Sen yokken konuşulanlar"><b>0</b> sen yokken</button>
+  <button id="eylemBtn" class="ikonBtn gizli" aria-label="Eylem"></button>
+</header>
+
+<!-- GÖVDE: class="mod-ev | mod-sohbet | mod-sesli | mod-sayfa" -->
+<main id="govde" class="mod-ev">
+  <div id="sahneKap">
+    <div id="etiketler"></div>
+  </div>
+  <div id="portre" aria-label="Karakter"><div class="portreIc"><img alt=""></div></div>
+  <div id="balon" class="gizli"><span id="balonYazi"></span></div>
+  <div id="ipucu">Kaydır: evde gezin · iki parmak: yakınlaştır · karaktere dokun: sana bakar</div>
+
+  <section id="mesajlar" aria-live="polite">
+    <div id="tutamac"><i></i><span id="sohbetBaslik">Genel sohbet</span><button id="sohbetKapat" class="ikonBtn" aria-label="Sohbeti kapat"></button></div>
+    <div id="katilimcilar" class="gizli"></div>
+    <div id="mesajListe"></div>
+    <div id="yaziyor" class="gizli"><i></i><i></i><i></i> <span></span></div>
+  </section>
+
+  <section id="sesliPanel">
+    <div id="dalga"></div>
+    <div id="sesliDurum">Hazırlanıyor…</div>
+    <div id="sesliKismi"></div>
+    <button id="sesliMik" class="buyukMik" aria-label="Mikrofon"></button>
+    <div class="sesliAlt">
+      <button id="sesliSessiz" class="yuvarlakBtn"><span></span><small>Sessize al</small></button>
+      <button id="sesliBitir" class="yuvarlakBtn kirmizi"><span></span><small>Bitir</small></button>
+    </div>
+  </section>
+
+  <div id="sayfaKap">
+    <iframe id="sayfaIframe" sandbox="allow-scripts allow-forms allow-modals" title="Sayfa"></iframe>
+  </div>
+</main>
+
+<!-- GİRİŞ ÇUBUĞU (ev ve sohbet modlarında) -->
+<form id="giris" autocomplete="off">
+  <input id="mesaj" placeholder="Nova'ya yaz…" maxlength="1000" enterkeyhint="send">
+  <button id="mikBtn" type="button" class="ikonBtn yuvarlak" aria-label="Sesli konuş"></button>
+  <button id="gonderBtn" type="submit" class="ikonBtn" aria-label="Gönder"></button>
+</form>
+
+<!-- ALT MENÜ -->
+<nav id="altMenu">
+  <button data-sekme="karakterler"><i data-ikon="kisiler"></i><span>Karakterler</span></button>
+  <button data-sekme="hafiza"><i data-ikon="hafiza"></i><span>Hafıza</span></button>
+  <button data-sekme="evduzeni"><i data-ikon="plan"></i><span>Ev Düzeni</span></button>
+  <button data-sekme="ayarlar"><i data-ikon="ayar"></i><span>Ayarlar</span></button>
+</nav>
+
+<!-- ALTTAN AÇILAN PANEL (alt menü, Atölye odası, Geliştirici) -->
+<div id="perde" class="gizli"></div>
+<aside id="panel" aria-hidden="true">
+  <div id="panelUst"><button id="panelGeri" class="ikonBtn gizli" aria-label="Geri"></button><span id="panelBaslik"></span><button id="panelKapat" class="ikonBtn" aria-label="Kapat"></button></div>
+  <section id="sekme-karakterler" class="sekme"></section>
+  <section id="sekme-hafiza" class="sekme"></section>
+  <section id="sekme-evduzeni" class="sekme"></section>
+  <section id="sekme-lab" class="sekme"></section>
+  <section id="sekme-atolye" class="sekme"></section>
+  <section id="sekme-ayarlar" class="sekme"></section>
+</aside>
+
+<!-- DOSYA DÜZENLEYİCİ (Laboratuvar) -->
+<div id="editor" class="gizli">
+  <div class="pencereUst">
+    <button id="editorKapat" class="ikonBtn" aria-label="Kapat"></button>
+    <span id="editorBaslik"></span>
+    <button id="editorKaydet" class="kucukBtn vurgu">Kaydet</button>
+  </div>
+  <div id="editorGovde"></div>
+  <div id="editorAlt"></div>
+</div>
+
+<!-- ÖNİZLEME (Laboratuvar / Atölye) -->
+<div id="onizleme" class="gizli">
+  <div class="pencereUst">
+    <button id="onizlemeKapat" class="ikonBtn" aria-label="Kapat"></button>
+    <span id="onizlemeBaslik">Önizleme</span>
+  </div>
+  <iframe id="onizlemeIframe" sandbox="allow-scripts allow-forms allow-modals" title="Önizleme"></iframe>
+</div>
+
+<div id="bildirim" class="gizli"></div>
+
+<script src="js/vendor.js"></script>
+<script src="js/baslat.js"></script>
+</body>
+</html>

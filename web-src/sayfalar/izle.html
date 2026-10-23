@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İzle</title>
+<style>
+/*ORTAK*/
+.video { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 12px 2px; border-bottom: 1px solid #241f40; align-items: center; }
+.video:last-child { border-bottom: 0; }
+.video b { font-size: 15px; }
+.video small { color: #8f87b8; display: block; word-break: break-all; }
+.video .islem { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; }
+.izlendi b { color: #8f87b8; text-decoration: line-through; }
+video { width: 100%; max-height: 60vh; border-radius: 12px; background: #000; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>İzle <small id="sayi"></small></h1>
+<div class="sekmeler" id="sekme"><button data-s="liste" class="aktif">İzleme listesi</button><button data-s="oynat">Telefondan video</button></div>
+
+<section id="s-liste">
+  <div class="kart">
+    <input id="baslik" placeholder="Film, dizi ya da video adı" maxlength="80">
+    <input id="link" placeholder="Bağlantı (YouTube vb., isteğe bağlı)" style="margin-top:8px" inputmode="url">
+    <div class="satir" style="margin-top:8px"><span></span><button class="btn vurgu" id="ekle">Listeye ekle</button></div>
+  </div>
+  <div class="kart" id="liste"></div>
+</section>
+
+<section id="s-oynat" class="gizli">
+  <div class="kart">
+    <p style="margin:0 0 10px;color:#a9a1d6;font-size:14px">Telefonundaki bir videoyu burada oynat. Video uygulamaya kopyalanmaz.</p>
+    <label class="btn vurgu" style="display:block;text-align:center">Video seç<input type="file" id="dosya" accept="video/*" class="gizli"></label>
+    <video id="oynatici" controls playsinline class="gizli"></video>
+    <p id="ad" style="color:#cfc4ff;margin:8px 0 0"></p>
+  </div>
+</section>
+<script>
+var videolar = [];
+function kaydet() { Lonca.kaydet('videolar', videolar); ciz(); }
+function el(t, c, m) { var e = document.createElement(t); if (c) e.className = c; if (m !== undefined) e.textContent = m; return e; }
+function ciz() {
+  var l = document.getElementById('liste'); l.innerHTML = '';
+  var kalan = videolar.filter(function (v) { return !v.izlendi; }).length;
+  document.getElementById('sayi').textContent = videolar.length ? kalan + ' izlenecek' : '';
+  if (!videolar.length) { l.appendChild(el('div', 'bos', 'Liste boş. İzlemek istediklerini ekle.')); return; }
+  videolar.forEach(function (v) {
+    var d = el('div', 'video' + (v.izlendi ? ' izlendi' : ''));
+    var sol = el('div'); sol.appendChild(el('b', '', v.baslik)); if (v.link) sol.appendChild(el('small', '', v.link));
+    var cb = el('button', 'cip', v.izlendi ? 'İzlendi' : 'İzlenecek');
+    cb.onclick = function () { v.izlendi = !v.izlendi; if (v.izlendi) Lonca.olay('izlendi', { baslik: v.baslik }); kaydet(); };
+    d.appendChild(sol); d.appendChild(cb);
+    var is = el('div', 'islem');
+    if (v.link) { var a = el('button', 'btn kucuk vurgu', 'Aç'); a.onclick = function () { Lonca.ac(v.link); Lonca.olay('izleniyor', { baslik: v.baslik }); }; is.appendChild(a); }
+    var s = el('button', 'btn kucuk tehlike', 'Kaldır'); s.onclick = function () { videolar = videolar.filter(function (x) { return x !== v; }); kaydet(); };
+    is.appendChild(s); d.appendChild(is); l.appendChild(d);
+  });
+}
+document.getElementById('ekle').onclick = function () {
+  var b = document.getElementById('baslik').value.trim(), k = document.getElementById('link').value.trim(); if (!b) return;
+  if (k && !/^https?:\/\//i.test(k)) k = 'https://' + k;
+  videolar.unshift({ id: Date.now().toString(36), baslik: b, link: k, izlendi: false, z: Date.now() });
+  document.getElementById('baslik').value = ''; document.getElementById('link').value = '';
+  kaydet(); Lonca.olay('video', { baslik: b });
+};
+document.getElementById('sekme').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  [].forEach.call(this.children, function (x) { x.classList.toggle('aktif', x === b); });
+  document.getElementById('s-liste').classList.toggle('gizli', b.dataset.s !== 'liste');
+  document.getElementById('s-oynat').classList.toggle('gizli', b.dataset.s !== 'oynat');
+};
+var url = null;
+document.getElementById('dosya').onchange = function (e) {
+  var f = e.target.files[0]; if (!f) return; if (url) URL.revokeObjectURL(url);
+  url = URL.createObjectURL(f); var v = document.getElementById('oynatici'); v.src = url; v.classList.remove('gizli'); v.play().catch(function () {});
+  document.getElementById('ad').textContent = f.name; Lonca.olay('izleniyor', { baslik: f.name });
+};
+Lonca.oku('videolar').then(function (v) { videolar = v || []; ciz(); });
+</script>
+</body>
+</html>

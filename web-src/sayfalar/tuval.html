@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Tuval</title>
+<style>
+/*ORTAK*/
+
+#tuvalKap { position: relative; border-radius: 14px; overflow: hidden; background: #fff; touch-action: none; }
+canvas { display: block; width: 100%; touch-action: none; }
+.arac { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+.renk { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #2e2752; padding: 0; }
+.renk.secili { outline: 2px solid #fff; outline-offset: 2px; }
+#ozelRenk { width: 34px; height: 34px; padding: 0; border: 0; background: none; }
+.arac .btn.secili { border-color: #a77de8; background: #3a2a66; color: #fff; }
+#boyut { flex: 1; min-width: 120px; accent-color: #a77de8; }
+.galeri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.galeri figure { margin: 0; background: #1e1a38; border-radius: 10px; overflow: hidden; }
+.galeri img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #fff; }
+.galeri figcaption { font-size: 11px; color: #a9a1d6; padding: 5px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#buyuk { position: fixed; inset: 0; background: #000d; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; z-index: 5; }
+#buyuk img { max-width: 100%; max-height: 72vh; border-radius: 10px; background: #fff; }
+</style>
+</head>
+<body>
+<h1>Tuval <small id="bilgi"></small></h1>
+<div class="sekmeler" id="sekme"><button data-s="ciz" class="aktif">Çiz</button><button data-s="galeri">Galeri</button></div>
+
+<section id="s-ciz">
+  <div id="tuvalKap"><canvas id="c"></canvas></div>
+  <div class="arac" id="renkler"></div>
+  <div class="arac">
+    <button class="btn kucuk secili" id="firca">Fırça</button>
+    <button class="btn kucuk" id="silgi">Silgi</button>
+    <input type="range" id="boyut" min="1" max="48" value="6" aria-label="Kalınlık">
+  </div>
+  <div class="arac">
+    <button class="btn vurgu" id="kaydet">Galeriye kaydet</button>
+    <button class="btn kucuk" id="geri">Geri al</button>
+    <button class="btn kucuk tehlike" id="temizle">Temizle</button>
+  </div>
+</section>
+
+<section id="s-galeri" class="gizli"><div class="galeri" id="galeri"></div></section>
+<div id="buyuk" class="gizli"><img alt=""><div class="satir" style="width:100%;max-width:420px"><button class="btn" id="bKapat">Kapat</button><button class="btn" id="bAc">Tuvalde aç</button><button class="btn tehlike" id="bSil">Sil</button></div></div>
+<script>
+var RENKLER = ['#1a1424', '#ffffff', '#e5484d', '#f2994a', '#f2c94c', '#3fb27f', '#2d9cdb', '#7b61ff', '#c76bd6', '#8b5a3c'];
+var c = document.getElementById('c'), g = c.getContext('2d'), renk = RENKLER[0], silgi = false, cizim = null, gecmis = [], galeri = [];
+var W = 1024, H = 1024;
+function boyutla() {
+  var gen = c.parentElement.clientWidth, yuk = Math.round(Math.min(window.innerHeight * 0.5, gen * 1.2));
+  c.style.height = yuk + 'px';
+  var eski = c.width ? g.getImageData(0, 0, c.width, c.height) : null;
+  var dpr = Math.min(2, window.devicePixelRatio || 1); W = Math.round(gen * dpr); H = Math.round(yuk * dpr);
+  if (c.width === W && c.height === H) return;
+  var tmp = null; if (eski) { tmp = document.createElement('canvas'); tmp.width = eski.width; tmp.height = eski.height; tmp.getContext('2d').putImageData(eski, 0, 0); }
+  c.width = W; c.height = H; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); if (tmp) g.drawImage(tmp, 0, 0);
+}
+function anlik() { try { gecmis.push(g.getImageData(0, 0, c.width, c.height)); if (gecmis.length > 15) gecmis.shift(); } catch (e) {} }
+function nokta(e) { var r = c.getBoundingClientRect(); return { x: (e.clientX - r.left) * c.width / r.width, y: (e.clientY - r.top) * c.height / r.height, p: e.pressure || 0.5 }; }
+c.addEventListener('pointerdown', function (e) {
+  c.setPointerCapture(e.pointerId); anlik(); var p = nokta(e); cizim = [p, p];
+  g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = silgi ? '#ffffff' : renk;
+  g.lineWidth = boyut() * (c.width / c.clientWidth); g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x + .01, p.y); g.stroke();
+});
+c.addEventListener('pointermove', function (e) {
+  if (!cizim) return; var p = nokta(e), a = cizim[cizim.length - 1], o = cizim[cizim.length - 2];
+  g.beginPath(); g.moveTo((o.x + a.x) / 2, (o.y + a.y) / 2); g.quadraticCurveTo(a.x, a.y, (a.x + p.x) / 2, (a.y + p.y) / 2); g.stroke(); cizim.push(p);
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { c.addEventListener(t, function () { cizim = null; }); });
+function boyut() { return +document.getElementById('boyut').value * (silgi ? 2.5 : 1); }
+var rk = document.getElementById('renkler');
+RENKLER.forEach(function (r, i) { var b = document.createElement('button'); b.className = 'renk' + (i ? '' : ' secili'); b.style.background = r; b.setAttribute('aria-label', r); b.onclick = function () { renk = r; silgiAyarla(false); [].forEach.call(rk.querySelectorAll('.renk'), function (x) { x.classList.toggle('secili', x === b); }); }; rk.appendChild(b); });
+var oz = document.createElement('input'); oz.type = 'color'; oz.id = 'ozelRenk'; oz.oninput = function () { renk = oz.value; silgiAyarla(false); }; rk.appendChild(oz);
+function silgiAyarla(v) { silgi = v; document.getElementById('silgi').classList.toggle('secili', v); document.getElementById('firca').classList.toggle('secili', !v); }
+document.getElementById('silgi').onclick = function () { silgiAyarla(true); };
+document.getElementById('firca').onclick = function () { silgiAyarla(false); };
+document.getElementById('geri').onclick = function () { var s = gecmis.pop(); if (s) g.putImageData(s, 0, 0); };
+document.getElementById('temizle').onclick = function () { if (!confirm('Tuval temizlensin mi?')) return; anlik(); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); };
+document.getElementById('kaydet').onclick = function () {
+  var ad = prompt('Resmin adı', 'Resim ' + (galeri.length + 1)); if (ad === null) return;
+  var k = Math.min(1, 1024 / Math.max(c.width, c.height)), t = document.createElement('canvas'); t.width = Math.round(c.width * k); t.height = Math.round(c.height * k);
+  t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+  galeri.unshift({ id: Date.now().toString(36), ad: (ad || 'Resim').slice(0, 40), z: Date.now(), veri: t.toDataURL('image/jpeg', 0.85) });
+  if (galeri.length > 40) galeri.length = 40;
+  Lonca.kaydet('galeri', galeri); Lonca.olay('resim', { ad: ad }); Lonca.soyle('Galeriye koydum: ' + ad);
+  bilgi(); galeriCiz();
+};
+function bilgi() { document.getElementById('bilgi').textContent = galeri.length ? galeri.length + ' resim' : ''; }
+var acik = null;
+function galeriCiz() {
+  var d = document.getElementById('galeri'); d.innerHTML = '';
+  if (!galeri.length) { d.innerHTML = '<div class="bos" style="grid-column:1/-1">Galeri boş. Bir şey çizip kaydet.</div>'; return; }
+  galeri.forEach(function (r) {
+    var f = document.createElement('figure'), im = document.createElement('img'), cap = document.createElement('figcaption');
+    im.src = r.veri; im.alt = r.ad; cap.textContent = r.ad; f.appendChild(im); f.appendChild(cap);
+    f.onclick = function () { acik = r; var b = document.getElementById('buyuk'); b.querySelector('img').src = r.veri; b.classList.remove('gizli'); };
+    d.appendChild(f);
+  });
+}
+document.getElementById('bKapat').onclick = function () { document.getElementById('buyuk').classList.add('gizli'); };
+document.getElementById('bSil').onclick = function () { if (!acik || !confirm('"' + acik.ad + '" silinsin mi?')) return; galeri = galeri.filter(function (x) { return x !== acik; }); Lonca.kaydet('galeri', galeri); bilgi(); galeriCiz(); document.getElementById('buyuk').classList.add('gizli'); };
+document.getElementById('bAc').onclick = function () {
+  if (!acik) return; var im = new Image(); im.onload = function () { anlik(); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); var k = Math.min(c.width / im.width, c.height / im.height); g.drawImage(im, (c.width - im.width * k) / 2, (c.height - im.height * k) / 2, im.width * k, im.height * k); };
+  im.src = acik.veri; document.getElementById('buyuk').classList.add('gizli'); sekme('ciz');
+};
+function sekme(s) { [].forEach.call(document.getElementById('sekme').children, function (x) { x.classList.toggle('aktif', x.dataset.s === s); }); document.getElementById('s-ciz').classList.toggle('gizli', s !== 'ciz'); document.getElementById('s-galeri').classList.toggle('gizli', s !== 'galeri'); if (s === 'galeri') galeriCiz(); }
+document.getElementById('sekme').onclick = function (e) { var b = e.target.closest('button'); if (b) sekme(b.dataset.s); };
+window.addEventListener('resize', boyutla); boyutla();
+Lonca.oku('galeri').then(function (v) { galeri = v || []; bilgi(); });
+</script>
+</body>
+</html>
